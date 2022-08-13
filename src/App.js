@@ -1,80 +1,80 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
-  const [inputText, setInputText] = useState("");
-  const [size, setSize] = useState(3);
-  const [direction, setDirection] = useState("horizontal");
+  const [inputString, setInputString] = useState("");
+  const [inputSize, setInputSize] = useState(3);
+  const [inputDirection, setInputDirection] = useState("horizontal");
 
-  // const [parts, setParts] = useState(
-  //   Array.from({ length: size * size }, (v, i) => i)
-  // );
+  const [size, setSize] = useState();
+  const [translatedString, setTranslatedString] = useState([]);
+
   const parts = Array.from({ length: size * size }, (v, i) => i);
 
-  const TOP_RIGHT = size - 1;
-  const BOTTOM_LEFT = (size - 1) * size;
-  const BOTTOM_RIGHT = size * size - 1;
-  const BOTTOM_CENTER = BOTTOM_RIGHT - (BOTTOM_RIGHT - BOTTOM_LEFT) / 2;
-  const CENTER = size * ((size - 1) / 2 + 1) - ((size - 1) / 2 + 1);
+  const topRight = inputSize - 1;
+  const bottomLeft = (inputSize - 1) * inputSize;
+  const bottomRight = inputSize * inputSize - 1;
+  const bottomCenter = bottomRight - (bottomRight - bottomLeft) / 2;
+  const center =
+    inputSize * ((inputSize - 1) / 2 + 1) - ((inputSize - 1) / 2 + 1);
 
-  const drawCenterToTopLeft = () => {
+  const getParts = (start, end, condition) => {
     let counter = 0;
-    const arr = [CENTER];
+    const arr = [start];
 
-    while (!arr.includes(0)) {
-      arr.push(arr[0 + counter] - (parseInt(size) + 1));
+    while (!arr.includes(end)) {
+      arr.push(arr[0 + counter] + condition);
       counter++;
     }
+
     return arr;
   };
 
-  const drawCenterToTopRight = () => {
-    let counter = 0;
-    const arr = [CENTER];
+  const drawX = () => [
+    ...getParts(0, center, parseInt(inputSize) + 1),
+    ...getParts(topRight, center, parseInt(inputSize) - 1),
+    ...getParts(center, bottomLeft, parseInt(inputSize) - 1),
+    ...getParts(center, bottomRight, parseInt(inputSize) + 1),
+  ];
 
-    while (!arr.includes(TOP_RIGHT)) {
-      arr.push(arr[0 + counter] - (parseInt(size) - 1));
-      counter++;
-    }
-    return arr;
+  const drawY = () => [
+    ...getParts(0, center, parseInt(inputSize) + 1),
+    ...getParts(topRight, center, parseInt(inputSize) - 1),
+    ...getParts(center, bottomCenter, parseInt(inputSize)),
+  ];
+
+  const drawZ = () => [
+    ...getParts(0, topRight, 1),
+    ...getParts(bottomLeft, bottomRight, 1),
+    ...getParts(topRight, center, parseInt(inputSize) - 1),
+    ...getParts(center, bottomLeft, parseInt(inputSize) - 1),
+  ];
+
+  const handleTranslate = (e) => {
+    e.preventDefault();
+
+    const translatedText = [];
+    const inputText = inputString.replace(/\s+/g, "").toLocaleLowerCase();
+
+    [...inputText].forEach((letter) => {
+      if (letter === "x") {
+        translatedText.push(drawX());
+      } else if (letter === "y") {
+        translatedText.push(drawY());
+      } else {
+        translatedText.push(drawZ());
+      }
+    });
+
+    setTranslatedString(translatedText);
+    setSize(inputSize);
   };
-
-  const drawCenterToBottomRight = () => {
-    let counter = 0;
-    const arr = [CENTER];
-
-    while (!arr.includes(BOTTOM_RIGHT)) {
-      arr.push(arr[0 + counter] + (parseInt(size) + 1));
-      counter++;
-    }
-    return arr;
-  };
-
-  const drawCenterToBottomLeft = () => {
-    let counter = 0;
-    const arr = [CENTER];
-
-    while (!arr.includes(BOTTOM_LEFT)) {
-      arr.push(arr[0 + counter] + (parseInt(size) - 1));
-      counter++;
-    }
-    return arr;
-  };
-
-  // const x = [
-  //   ...drawCenterToTopLeft(),
-  //   ...drawCenterToTopRight(),
-  //   ...drawCenterToBottomLeft(),
-  //   ...drawCenterToBottomRight(),
-  // ];
-
-  // const getGridCols = () => `grid-cols-${size}`;
 
   return (
     <div className="min-h-screen max-w-6xl mx-auto py-24 px-8 space-y-8">
       <h1 className="font-bold border-b pb-8">XYZ Input Translator</h1>
 
       <main className="space-y-8">
-        <form action="" className="space-y-4 border-b pb-8">
+        <form onSubmit={handleTranslate} className="space-y-4 border-b pb-8">
           <div className="flex flex-col md:flex-row space-x-0 md:space-x-8 space-y-8 md:space-y-0">
             <div className="space-y-2 w-full md:w-1/2">
               <p className="font-bold">String:</p>
@@ -83,7 +83,7 @@ function App() {
                 required
                 className="input-primary w-full"
                 placeholder="e.g. xxyyzz"
-                onChange={(e) => setInputText(e.target.value)}
+                onChange={(e) => setInputString(e.target.value)}
               />
             </div>
 
@@ -92,12 +92,12 @@ function App() {
                 <p className="font-bold">Size:</p>
                 <input
                   type="number"
-                  value={size}
+                  value={inputSize}
                   required
                   min="3"
                   step="2"
                   className="input-primary"
-                  onChange={(e) => setSize(e.target.value)}
+                  onChange={(e) => setInputSize(e.target.value)}
                 />
               </div>
 
@@ -105,7 +105,7 @@ function App() {
                 <p className="font-bold">Direction:</p>
                 <select
                   className="input-primary"
-                  onChange={(e) => setDirection(e.target.value)}
+                  onChange={(e) => setInputDirection(e.target.value)}
                 >
                   <option value="horizontal">Horizontal</option>
                   <option value="vertical">Vertical</option>
@@ -121,34 +121,31 @@ function App() {
 
         <section className="space-y-8">
           <h3 className="font-bold">Output</h3>
-          <div className="flex space-x-4 items-center justify-center">
-            {/* {translatedText.map((letterArr, i) => (
-              <div key={i} className="grid grid-cols-3">
-                {parts?.map((part, i) => (
+          <div className="flex items-center justify-center">
+            <div className="overflow-auto max-h-[50vh]">
+              <div className="flex space-x-16 pb-8">
+                {translatedString?.map((letterArr, i) => (
                   <div
                     key={i}
-                    className={`${
-                      letterArr.includes(part) ? "bg-red-500" : "bg-gray-100"
-                    }`}
+                    className="grid gap-x-4"
+                    style={{
+                      gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+                    }}
                   >
-                    0
+                    {parts?.map((part, i) => (
+                      <div
+                        key={i}
+                        className={`${
+                          !letterArr.includes(part) && "opacity-0"
+                        }`}
+                      >
+                        o
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
-            ))} */}
-            {/* <div
-              className="grid gap-x-4"
-              style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
-            >
-              {parts?.map((part, i) => (
-                <div
-                  key={i}
-                  className={`${drawX().includes(part) ? "" : "opacity-0"}`}
-                >
-                  <h1 className="font-bold">o</h1>
-                </div>
-              ))}
-            </div> */}
+            </div>
           </div>
         </section>
       </main>

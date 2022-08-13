@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { draw } from "./utils/helpers";
 
 function App() {
   const [inputString, setInputString] = useState("");
@@ -6,68 +7,72 @@ function App() {
   const [inputDirection, setInputDirection] = useState("horizontal");
 
   const [size, setSize] = useState();
+  const [direction, setDirection] = useState();
   const [translatedString, setTranslatedString] = useState([]);
 
+  // Define grid size according to submitted size
   const parts = Array.from({ length: size * size }, (v, i) => i);
 
-  const topRight = inputSize - 1;
-  const bottomLeft = (inputSize - 1) * inputSize;
-  const bottomRight = inputSize * inputSize - 1;
-  const bottomCenter = bottomRight - (bottomRight - bottomLeft) / 2;
+  // Determine center, necessary corners, and edges of a square grid
   const center =
     inputSize * ((inputSize - 1) / 2 + 1) - ((inputSize - 1) / 2 + 1);
 
-  const getParts = (start, end, condition) => {
-    let counter = 0;
-    const arr = [start];
+  const topLeft = 0;
+  const topRight = inputSize - 1;
+  const bottomLeft = (inputSize - 1) * inputSize;
+  const bottomRight = inputSize * inputSize - 1;
 
-    while (!arr.includes(end)) {
-      arr.push(arr[0 + counter] + condition);
-      counter++;
-    }
+  const bottomCenter = bottomRight - (bottomRight - bottomLeft) / 2;
 
-    return arr;
-  };
-
+  // Combine drawn parts to form the letter
   const drawX = () => [
-    ...getParts(0, center, parseInt(inputSize) + 1),
-    ...getParts(topRight, center, parseInt(inputSize) - 1),
-    ...getParts(center, bottomLeft, parseInt(inputSize) - 1),
-    ...getParts(center, bottomRight, parseInt(inputSize) + 1),
+    ...draw.slash(topRight, center, inputSize),
+    ...draw.slash(center, bottomLeft, inputSize),
+    ...draw.backSlash(topLeft, center, inputSize),
+    ...draw.backSlash(center, bottomRight, inputSize),
   ];
 
   const drawY = () => [
-    ...getParts(0, center, parseInt(inputSize) + 1),
-    ...getParts(topRight, center, parseInt(inputSize) - 1),
-    ...getParts(center, bottomCenter, parseInt(inputSize)),
+    ...draw.slash(topRight, center, inputSize),
+    ...draw.backSlash(topLeft, center, inputSize),
+    ...draw.verticalSlash(center, bottomCenter, inputSize),
   ];
 
   const drawZ = () => [
-    ...getParts(0, topRight, 1),
-    ...getParts(bottomLeft, bottomRight, 1),
-    ...getParts(topRight, center, parseInt(inputSize) - 1),
-    ...getParts(center, bottomLeft, parseInt(inputSize) - 1),
+    ...draw.slash(topRight, center, inputSize),
+    ...draw.slash(center, bottomLeft, inputSize),
+    ...draw.horizontalSlash(topLeft, topRight, inputSize),
+    ...draw.horizontalSlash(bottomLeft, bottomRight, inputSize),
   ];
 
+  // Loop through each character of the input string & translate to the appropriate representation
   const handleTranslate = (e) => {
     e.preventDefault();
 
-    const translatedText = [];
-    const inputText = inputString.replace(/\s+/g, "").toLocaleLowerCase();
+    const translatedString = [];
+    const text = inputString.replace(/\s+/g, "").toLocaleLowerCase();
 
-    [...inputText].forEach((letter) => {
-      if (letter === "x") {
-        translatedText.push(drawX());
-      } else if (letter === "y") {
-        translatedText.push(drawY());
+    [...text].forEach((character) => {
+      if (character === "x") {
+        translatedString.push(drawX());
+      } else if (character === "y") {
+        translatedString.push(drawY());
       } else {
-        translatedText.push(drawZ());
+        translatedString.push(drawZ());
       }
     });
 
-    setTranslatedString(translatedText);
+    setTranslatedString(translatedString);
     setSize(inputSize);
+    setDirection(inputDirection);
   };
+
+  const getDirection = () =>
+    `${
+      direction === "horizontal"
+        ? "flex-row space-x-16 pb-8"
+        : "flex-col space-y-16"
+    }`;
 
   return (
     <div className="min-h-screen max-w-6xl mx-auto py-24 px-8 space-y-8">
@@ -121,9 +126,9 @@ function App() {
 
         <section className="space-y-8">
           <h3 className="font-bold">Output</h3>
-          <div className="flex items-center justify-center">
-            <div className="overflow-auto max-h-[50vh]">
-              <div className="flex space-x-16 pb-8">
+          <div className="overflow-auto flex items-center justify-center">
+            <div className="max-h-[50vh] max-w-full">
+              <div className={`flex ${getDirection()}`}>
                 {translatedString?.map((letterArr, i) => (
                   <div
                     key={i}
@@ -133,14 +138,14 @@ function App() {
                     }}
                   >
                     {parts?.map((part, i) => (
-                      <div
+                      <h1
                         key={i}
                         className={`${
                           !letterArr.includes(part) && "opacity-0"
                         }`}
                       >
                         o
-                      </div>
+                      </h1>
                     ))}
                   </div>
                 ))}

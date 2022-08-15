@@ -37,5 +37,5 @@ Features:
 
   - ![](https://github.com/Randell-janus/xyz-input-translator/blob/main/public/snapshots/vertical.png)
 
-- Horizontal sample
+- Invalid input sample
   - ![](https://github.com/Randell-janus/xyz-input-translator/blob/main/public/snapshots/error.png)

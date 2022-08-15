@@ -1,3 +1,6 @@
+// An array of the allowed letter inputs
+export const ALLOWED_LETTERS = ["x", "y", "z"];
+
 // A function that appends grid indices to an array until the end argument is appended
 // The args are the starting point and end point of the line to be drawn
 export const getRequiredParts = (start, end, condition) => {
@@ -26,7 +29,16 @@ export const draw = {
     return getRequiredParts(start, end, parseInt(inputSize));
   },
 
-  horizontalSlash: (start, end, inputSize) => {
+  horizontalSlash: (start, end) => {
     return getRequiredParts(start, end, 1);
   },
+};
+
+// A function responsible for client side form validation
+export const inputIsValid = (string, size) => {
+  const sizeIsValid = size >= 3 && size % 2 !== 0;
+
+  return [...string].every(
+    (character) => ALLOWED_LETTERS.includes(character) && sizeIsValid
+  );
 };

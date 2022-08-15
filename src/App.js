@@ -1,30 +1,37 @@
 import { useState } from "react";
-import { draw } from "./utils/helpers";
+
+import { draw, ALLOWED_LETTERS, inputIsValid } from "./utils/helpers";
+import {
+  GridContainer,
+  InputContainer,
+  OutputContainer,
+} from "./components/containers";
 
 function App() {
+  // Declare states for inputs and form submitted values
   const [inputString, setInputString] = useState("");
   const [inputSize, setInputSize] = useState(3);
   const [inputDirection, setInputDirection] = useState("horizontal");
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [size, setSize] = useState();
   const [direction, setDirection] = useState();
   const [translatedString, setTranslatedString] = useState([]);
 
   // Define grid size according to submitted size
-  const parts = Array.from({ length: size * size }, (v, i) => i);
+  const grid = Array.from({ length: size * size }, (v, i) => i);
 
   // Determine center, necessary corners, and edges of a square grid
   const center =
     inputSize * ((inputSize - 1) / 2 + 1) - ((inputSize - 1) / 2 + 1);
-
   const topLeft = 0;
   const topRight = inputSize - 1;
   const bottomLeft = (inputSize - 1) * inputSize;
   const bottomRight = inputSize * inputSize - 1;
-
   const bottomCenter = bottomRight - (bottomRight - bottomLeft) / 2;
 
-  // Combine drawn parts to form the letter
+  // Combine drawn grid to form the letter
   const drawX = () => [
     ...draw.slash(topRight, center, inputSize),
     ...draw.slash(center, bottomLeft, inputSize),
@@ -45,17 +52,25 @@ function App() {
     ...draw.horizontalSlash(bottomLeft, bottomRight, inputSize),
   ];
 
-  // Loop through each character of the input string & translate to the appropriate representation
+  // Main function to handle translation
   const handleTranslate = (e) => {
     e.preventDefault();
+    setErrorMessage("");
 
     const translatedString = [];
     const text = inputString.replace(/\s+/g, "").toLocaleLowerCase();
 
+    // return from function if input string contains invalid character
+    if (!inputIsValid(text, inputSize)) {
+      setErrorMessage("Input string/size contains an invalid value");
+      return;
+    }
+
+    // translate to the appropriate representation
     [...text].forEach((character) => {
-      if (character === "x") {
+      if (character === ALLOWED_LETTERS[0]) {
         translatedString.push(drawX());
-      } else if (character === "y") {
+      } else if (character === ALLOWED_LETTERS[1]) {
         translatedString.push(drawY());
       } else {
         translatedString.push(drawZ());
@@ -67,13 +82,6 @@ function App() {
     setDirection(inputDirection);
   };
 
-  const getDirection = () =>
-    `${
-      direction === "horizontal"
-        ? "flex-row space-x-16 pb-8"
-        : "flex-col space-y-16"
-    }`;
-
   return (
     <div className="min-h-screen max-w-6xl mx-auto py-24 px-8 space-y-8">
       <h1 className="font-bold border-b pb-8">XYZ Input Translator</h1>
@@ -81,8 +89,7 @@ function App() {
       <main className="space-y-8">
         <form onSubmit={handleTranslate} className="space-y-4 border-b pb-8">
           <div className="flex flex-col md:flex-row space-x-0 md:space-x-8 space-y-8 md:space-y-0">
-            <div className="space-y-2 w-full md:w-1/2">
-              <p className="font-bold">String:</p>
+            <InputContainer label="String:">
               <input
                 type="text"
                 required
@@ -90,11 +97,10 @@ function App() {
                 placeholder="e.g. xxyyzz"
                 onChange={(e) => setInputString(e.target.value)}
               />
-            </div>
+            </InputContainer>
 
             <div className="flex flex-1 space-x-8 items-end">
-              <div className="space-y-2 w-1/2">
-                <p className="font-bold">Size:</p>
+              <InputContainer label="Size:">
                 <input
                   type="number"
                   value={inputSize}
@@ -104,10 +110,9 @@ function App() {
                   className="input-primary"
                   onChange={(e) => setInputSize(e.target.value)}
                 />
-              </div>
+              </InputContainer>
 
-              <div className="space-y-2 flex-1">
-                <p className="font-bold">Direction:</p>
+              <InputContainer label="Direction:">
                 <select
                   className="input-primary"
                   onChange={(e) => setInputDirection(e.target.value)}
@@ -115,43 +120,33 @@ function App() {
                   <option value="horizontal">Horizontal</option>
                   <option value="vertical">Vertical</option>
                 </select>
-              </div>
+              </InputContainer>
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex flex-col items-end space-y-2">
+            <p className="text-red-500 font-normal">{errorMessage}</p>
             <button className="btn-primary">DRAW</button>
           </div>
         </form>
 
         <section className="space-y-8">
           <h3 className="font-bold">Output</h3>
-          <div className="overflow-auto flex items-center justify-center">
-            <div className="max-h-[50vh] max-w-full">
-              <div className={`flex ${getDirection()}`}>
-                {translatedString?.map((letterArr, i) => (
-                  <div
+
+          <OutputContainer direction={direction}>
+            {translatedString?.map((letterArr, i) => (
+              <GridContainer size={size} key={i}>
+                {grid?.map((block, i) => (
+                  <h1
                     key={i}
-                    className="grid gap-x-4"
-                    style={{
-                      gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
-                    }}
+                    className={`${!letterArr.includes(block) && "opacity-0"}`}
                   >
-                    {parts?.map((part, i) => (
-                      <h1
-                        key={i}
-                        className={`${
-                          !letterArr.includes(part) && "opacity-0"
-                        }`}
-                      >
-                        o
-                      </h1>
-                    ))}
-                  </div>
+                    o
+                  </h1>
                 ))}
-              </div>
-            </div>
-          </div>
+              </GridContainer>
+            ))}
+          </OutputContainer>
         </section>
       </main>
     </div>

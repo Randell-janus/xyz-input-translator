@@ -82,6 +82,12 @@ function App() {
     setDirection(inputDirection);
   };
 
+  const handleReset = () => {
+    setInputString("");
+    setErrorMessage("");
+    setTranslatedString([]);
+  };
+
   return (
     <div className="min-h-screen max-w-6xl mx-auto py-24 px-8 space-y-8">
       <h1 className="font-bold border-b pb-8">XYZ Input Translator</h1>
@@ -92,6 +98,7 @@ function App() {
             <InputContainer label="String:">
               <input
                 type="text"
+                value={inputString}
                 required
                 className="input-primary w-full"
                 placeholder="e.g. xxyyzz"
@@ -126,7 +133,18 @@ function App() {
 
           <div className="flex flex-col items-end space-y-2">
             <p className="text-red-500 font-normal">{errorMessage}</p>
-            <button className="btn-primary">DRAW</button>
+            <div className="flex space-x-4">
+              <button
+                className="btn-outline"
+                type="button"
+                onClick={handleReset}
+              >
+                CLEAR ALL
+              </button>
+              <button className="btn-primary" type="submit">
+                DRAW
+              </button>
+            </div>
           </div>
         </form>
 

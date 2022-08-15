@@ -23,8 +23,13 @@
 
 @layer components {
   .btn-primary {
-    @apply px-6 py-2 bg-slate-800 rounded-md tracking-widest;
-    @apply hover:bg-slate-700 transition-all active:scale-95 text-white;
+    @apply button-shape bg-slate-800;
+    @apply hover:bg-slate-700 text-white;
+  }
+
+  .btn-outline {
+    @apply button-shape border text-black;
+    @apply hover:bg-rose-500 hover:text-white hover:border-transparent;
   }
 
   .input-primary {
@@ -34,3 +39,6 @@
   }
 }
 
+.button-shape {
+  @apply rounded-md tracking-widest px-6 py-2 active:scale-95 transition-all;
+}

@@ -31,11 +31,11 @@ Features:
 
 - Horizontal sample
 
-  - ![](https://github.com/Randell-janus/xyz-input-translator/blob/main/public/snapshots/horizontal.PNG)
+  - ![](https://github.com/Randell-janus/xyz-input-translator/blob/main/public/snapshots/horizontal.png)
 
 - Vertical sample
 
-  - ![](https://github.com/Randell-janus/xyz-input-translator/blob/main/public/snapshots/vertical.PNG)
+  - ![](https://github.com/Randell-janus/xyz-input-translator/blob/main/public/snapshots/vertical.png)
 
 - Horizontal sample
-  - ![](https://github.com/Randell-janus/xyz-input-translator/blob/main/public/snapshots/error.PNG)
+  - ![](https://github.com/Randell-janus/xyz-input-translator/blob/main/public/snapshots/error.png)

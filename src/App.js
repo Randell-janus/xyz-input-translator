@@ -23,8 +23,10 @@ function App() {
   const grid = Array.from({ length: size * size }, (v, i) => i);
 
   // Determine center, necessary corners, and edges of a square grid
+  // const center =
+  //   inputSize * ((inputSize - 1) / 2 + 1) - ((inputSize - 1) / 2 + 1);
   const center =
-    inputSize * ((inputSize - 1) / 2 + 1) - ((inputSize - 1) / 2 + 1);
+    inputSize * ((parseInt(inputSize) + 1) / 2) - (parseInt(inputSize) + 1) / 2;
   const topLeft = 0;
   const topRight = inputSize - 1;
   const bottomLeft = (inputSize - 1) * inputSize;
